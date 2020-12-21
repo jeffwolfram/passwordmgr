@@ -1,6 +1,12 @@
 from tkinter import *
+from tkinter import messagebox
+
+
 COLOR = "#ddd"
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
+
+
+
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
@@ -8,15 +14,19 @@ def save():
     website = website_input.get()
     password = password_input.get()
     email = email_input.get()
-    print(type(password))
-    clipboard_clear()
-    clipboard_append(password)
-    with open("password.txt", 'a') as data_file:
-        data_file.write(f'{website} | {email} | {password}\n')
-        print(password)
+    if password == '' or website == '':
+        messagebox.showinfo(title='Missing', message="Please don't leave any fields open!")
+    else:
+        is_okay = messagebox.askokcancel(title=website, message=f"These are your details entered: \nEmail: {email} \n Password: {password}\n Is it okay to save?")
+        if is_okay:
+            with open("password.txt", 'a') as data_file:
+                data_file.write(f'{website} | {email} | {password}\n')
+                print(password)
+                website_input.delete(0, END)
+                password_input.delete(0, END)
 
-    website_input.delete(0, END )
-    password_input.delete(0, END )
+
+
 # ---------------------------- UI SETUP -------------------------------
 
 
