@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
 import json
-import pandas
+
 
 
 COLOR = "#ddd"
@@ -23,10 +23,8 @@ def generate_password():
     password = ''.join(password_list)
     password_input.insert(0, password)
 
-def find_password():
-    list = pandas.read_json('password.json')
-    print(list)
-    messagebox.showinfo(title="Password Search", message=f"Website: \nPassword: ")
+
+
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
@@ -52,6 +50,8 @@ def save():
             with open("password.json", 'w') as data_file:
                 # saving new data if file did not exist
                 json.dump(new_data, data_file, indent=4)
+                website_input.delete(0, END)
+                password_input.delete(0, END)
         else:
             # updating old data
             data.update(new_data)
@@ -60,10 +60,32 @@ def save():
 
                 #saving old data
                 json.dump(data, data_file, indent=4)
-                print(password)
                 website_input.delete(0, END)
                 password_input.delete(0, END)
 
+# ---------------------------- FIND PASSWORD -------------------------------
+
+def find_password():
+ 
+    website = website_input.get()
+    try:
+        with open("./password.json") as data_file:
+            data = json.load(data_file)    
+       
+    except FileNotFoundError:
+        messagebox.showinfo(title='Not found', message='No password database found. You have no passwords yet.')
+
+    else:
+        if website in data:
+            email = data[website]['email']
+            password = data[website]['password']
+            messagebox.showinfo(title=f'{data[website]}', message=f"Email: {email}\nPassword: {password}")
+
+        else:
+            messagebox.showinfo(title=f'{website} not found', message=f"I do not see {website} listed in this database")
+
+
+    
 
 
 # ---------------------------- UI SETUP -------------------------------
@@ -86,8 +108,8 @@ website_input = Entry( width=21 )
 website_input.grid(row=1, column=1, columnspan=1)
 website = website_input.get()
 
-website_button = Button(text="Search", highlightbackground=COLOR, width=11, command=find_password)
-website_button.grid(row=1, column=2)
+search_button = Button(text="Search", highlightbackground=COLOR, width=11, command=find_password)
+search_button.grid(row=1, column=2)
 
 email_label = Label(text="Email/Username:", font=("Arial", 20))
 email_label.grid(row=2, column=0)
