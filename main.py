@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
+import json
+import pandas
 
 
 COLOR = "#ddd"
@@ -21,7 +23,10 @@ def generate_password():
     password = ''.join(password_list)
     password_input.insert(0, password)
 
-
+def find_password():
+    list = pandas.read_json('password.json')
+    print(list)
+    messagebox.showinfo(title="Password Search", message=f"Website: \nPassword: ")
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
@@ -29,13 +34,32 @@ def save():
     website = website_input.get()
     password = password_input.get()
     email = email_input.get()
+    new_data = {
+        website: {
+            "email": email,
+                "password": password
+        }
+    }
     if password == '' or website == '':
         messagebox.showinfo(title='Missing', message="Please don't leave any fields open!")
     else:
-        is_okay = messagebox.askokcancel(title=website, message=f"These are your details entered: \nEmail: {email} \n Password: {password}\n Is it okay to save?")
-        if is_okay:
-            with open("password.txt", 'a') as data_file:
-                data_file.write(f'{website} | {email} | {password}\n')
+        try:
+            with open("password.json", 'r') as data_file:
+                # reading old data
+                data = json.load(data_file)
+
+        except FileNotFoundError:
+            with open("password.json", 'w') as data_file:
+                # saving new data if file did not exist
+                json.dump(new_data, data_file, indent=4)
+        else:
+            # updating old data
+            data.update(new_data)
+
+            with open("password.json", 'w') as data_file:
+
+                #saving old data
+                json.dump(data, data_file, indent=4)
                 print(password)
                 website_input.delete(0, END)
                 password_input.delete(0, END)
@@ -58,15 +82,18 @@ canvas.grid(row=0, column=1)
 website_label = Label(text="Website:", font=("Arial", 20))
 website_label.grid(row=1, column=0)
 
-website_input = Entry( width=35)
-website_input.grid(row=1, column=1, columnspan=2)
+website_input = Entry( width=21 )
+website_input.grid(row=1, column=1, columnspan=1)
 website = website_input.get()
+
+website_button = Button(text="Search", highlightbackground=COLOR, width=11, command=find_password)
+website_button.grid(row=1, column=2)
 
 email_label = Label(text="Email/Username:", font=("Arial", 20))
 email_label.grid(row=2, column=0)
 
 
-email_input = Entry(width=35)
+email_input = Entry(width=35 )
 email_input.grid(row=2, column=1, columnspan=2)
 email_input.insert(0, "jeffwolfram@gmail.com")
 
@@ -79,7 +106,7 @@ password_input = Entry( width=21, textvariable="StringVar")
 password_input.grid(row=3, column=1)
 
 
-generate_password_button = Button(text="Generate Password", command=generate_password)
+generate_password_button = Button(text="Generate Password", command=generate_password, highlightbackground=COLOR)
 generate_password_button.grid(row=3, column=2)
 
 
